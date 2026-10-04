@@ -80,8 +80,3 @@ Dense models use `peft<0.15`.
 
 **6. Tables:** `python tables/agg_paper.py results/` reads `results/<run>/results/<Fam>/...` and `results/<run>/lora/<Fam>/...`
 (each `<run>` is one copy of the ILSE root's `results/` and `lora/` outputs) and writes the LaTeX tables.
-
-### Qwen3.6-35B-A3B budget (disclosed in the paper)
-
-`ILSE_MAX_N=1000` (every split capped to a seeded subset), `GSM8K_N=500,100,100`, 20 cls epochs, STS `--epochs 10 --batch_size 64`,
-LoRA `--epochs 3`, calib `--tokens 200000`, NTP `--bs 2 --train_tokens 100000 --eval_tokens 65536`.
