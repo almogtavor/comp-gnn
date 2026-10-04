@@ -1,20 +1,4 @@
 """Per-component (attention head z, MLP output) features, aligned row-by-row with ILSE's h5 files.
-
-Run from the ILSE-main root:  python -m comp_gnn.components --emb_dir <out>/<Family>_<size>_mean_pooling --task X
-Writes <task>/{split}_z.npy (N, nl, H*hd) pre-o_proj head outputs, {split}_mlp.npy (N, nl, D), W_O.npy (nl, D, H*hd),
-b_O.npy (nl, D) and meta.json {nheads, nexperts, k}. Head h's residual contribution at block l =
-z[:, l, h*hd:(h+1)*hd] @ W_O[l][:, h*hd:(h+1)*hd].T (mean pooling commutes with the linear map).
-Gemma2 applies RMSNorm after attention/MLP: post_attn_norm(o) = o / rms(o) * (1 + w) with rms per token, so we store
-z / rms(o) per token before pooling and fold (1 + w) into W_O (exact); the MLP feature is the post-FF-norm output.
-Gemma4: same fold with w instead of 1 + w; heads (256- or 512-wide by layer) are zero-padded to the widest in z and W_O;
-the per-layer-embedding (PLE) residual term is folded into the MLP node; layer_scalar s (r_{l+1} = s * (r_l + block))
-is folded into W_O and the MLP feature, so they are each component's contribution to r_{l+1}.
-MoE (Qwen3.6, Qwen3_5MoeSparseMoeBlock): {split}_gate.npy (N, nl, E) token-mean router weights g_e (0 when unrouted) and
-{split}_exp.npy (N, nl, E*K) token-mean of a fixed JL projection (seed = layer, N(0, 1/K) entries, K=32) of each expert's
-gated output g_e * E_e(x); the projection commutes with mean pooling. The MLP feature is the gated shared expert only, so
-no aggregate node duplicates the experts (shared + routed == block output is asserted). Qwen3.6 DeltaNet layers have no
-o_proj: their z is the linear_attn.out_proj input (32 value heads x 128, so each 256-wide slot = the 2 value heads that
-share one key head); full-attention layers' z already includes the sigmoid output gate.
 """
 import argparse
 import json

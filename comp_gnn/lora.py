@@ -1,9 +1,3 @@
-"""ILSE's LoRA baseline: their training loop (run_optuna_trial_lora.train_and_eval_lora) at their lora_trainer.py default
-config (r 2, alpha 16, dropout 0.1, lr 5e-4, wd 1e-4, bs 32, 20 epochs; no tuning), plus the test evaluation their
-script omits. Run from the ILSE-main root, one process per (model, task, seed):
-  python -m comp_gnn.lora --task X --model_family F --model_size S --study_dir D --worker SEED
-Reports test accuracy at the best-validation epoch (same early stopping as theirs).
-"""
 import argparse
 import json
 import os

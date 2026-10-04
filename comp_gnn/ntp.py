@@ -1,16 +1,3 @@
-"""Next-token prediction with inter-layer readouts vs LoRA, on a frozen LLM.
-
-Readout methods (ILSE encoders + ours, from run.build) read each token's own features - layerwise residuals r (L, D),
-pre-o_proj head outputs z and MLP outputs - which are causal, so no token sees its future. A zero-initialised Linear maps
-the readout embedding to a correction of the final (post-norm) hidden state: logits = lm_head(h_L + up(embed)), so every
-readout starts exactly at the frozen model's perplexity. LoRA (ILSE's target modules) fine-tunes the LLM on the same
-tokens. Gated LoRA (gnn_lora; controls noedge_lora, mlp_lora): LoRA whose rank-r update is gated per token,
-W x_t + B(s_t * A x_t), with s_t = 1 + head(enc(token t's frozen-pass features)) - zero-init head, so it starts as LoRA;
-causal since token t's features only see its prefix. lora_pm: plain LoRA at the smallest rank whose counted trainable params are
->= gnn_lora's (the parameter-matched baseline). Same token budget, 2048 tokens per optimizer step, one epoch; lr picked from 3 options by a
-<=1 min probe (20 s of training each, dev ppl), shared by all seeds.
-Run from the ILSE-main root:  python -m comp_gnn.ntp --model_family F --model_size S --dataset wikitext --out r.json
-"""
 import argparse
 import json
 import math

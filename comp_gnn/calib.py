@@ -1,16 +1,3 @@
-"""comp_hier_xl calibration: fixed cross-layer component edges for HierGIN, from FineWeb only (no task data, labels or dev
-data; the topology is fixed before any downstream training).
-Score(a, b) = max(0, token-mean cos(c_a, c_b)) of per-token residual contributions c (JL-256: c R, R ~ N(0, 1/256)), for a, b
-in different blocks; top-k partners per component, symmetric union. Positive only: GIN edges are unsigned, so an anti-aligned
-pair must not look aligned. Writes (2, E) int64, both directions, in CompGIN component order (block-major, heads then MLP).
-Also writes <out>_sim.npy: the same top-k over all component pairs (comp_similarity).
-MoE (Qwen3.6): the MLP slot is the gated shared expert (the cls/STS MLP node); routed experts get edges from the co-routing
-lift P(e_j | e_i) / P(e_j) (log lift > 0, top-k, different blocks; no head<->expert edges), written to <out>_exp.npy /
-<out>_sim_exp.npy in the expert-inclusive order (block-major, heads, MLP, experts). <out>.npy / <out>_sim.npy keep the
-no-expert order for NTP / GSM8K, whose MLP node is the whole MoE block (the edges are still scored on the shared expert).
-  python -m comp_gnn.calib --model_family Pythia --model_size 410m --out xedges/Pythia.npy
-  python -m comp_gnn.calib --selfcheck
-"""
 import argparse
 import os
 

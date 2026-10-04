@@ -1,9 +1,3 @@
-"""ILSE STS protocol (paper Sec. 5 / their run_optuna_trial_sts_*): train a siamese encoder on STSBenchmark train with
-MSE on min + (cos+1)/2 * (max-min), select on STSBenchmark validation Spearman, report STSBenchmark test and zero-shot
-transfer to STS12-16, BIOSSES, SICK-R (test splits; metric = Spearman(cos, gold), as MTEB cos_sim).
-Run from the ILSE-main root:  python -m comp_gnn.sts --model_family F --model_size S --out res.json [--methods ...]
-Features (layerwise residual r, head z, MLP outputs) are encoded in-process with components.run, kept on CPU in fp16.
-"""
 import argparse
 import copy
 import json

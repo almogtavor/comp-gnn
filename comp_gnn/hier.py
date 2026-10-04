@@ -1,32 +1,3 @@
-"""comp_hier_cayley: ILSE's layer Cayley GIN (same SL(2,Z_n) graph over the L residual "mega-nodes", virtual nodes,
-LayerGINEncoder, train_eps) plus each block's head / MLP (/ expert) nodes, each with one bidirectional edge to the mega-node
-its block writes (r_{l+1}). The readout pools the L real mega-nodes only, so components reach the embedding only through
-message passing - a win cannot come from components entering the pool directly (unlike comp_cayley / comp_noedge).
-Component inputs get a parameter-free LayerNorm (head/expert contributions are much smaller than the residual stream).
-Variants (same graph unless noted), each one change vs comp_hier_cayley:
-  comp_hier_readout: readout = [mean over mega-nodes ; mean over component nodes] (512-d)
-  comp_hier_deep:    one extra GIN layer (nl + 1), so components get one more hop past their mega-node
-  comp_hier_mean:    mean instead of sum neighbor aggregation (8-32 components no longer swamp a mega-node's residual)
-  comp_hier_bal:     type-balanced aggregation into mega-nodes: each node type's messages (heads / MLP / experts) enter
-                     as their mean, so the many expert nodes do not swamp the heads and MLP (the message-passing
-                     analogue of the MoE type-balanced pooling; no parameters)
-  comp_hier_gate:    comp_hier_bal with each expert -> mega edge weighted by that expert's router gate for this input
-                     (token-mean of the top-k normalized gates, so a layer's expert weights still sum to 1) instead of
-                     1 / n_experts: messages come from the experts the router chose (MoE only; no parameters)
-  comp_hier_xl:      + fixed cross-layer component edges from calib.py (FineWeb only), read from $XEDGES
-_e10 suffix (MoE): per-type weights heads / MLP / experts = 45 / 45 / 10% instead of a third each (equal balancing gives
-the noisy K=32 expert sketches 1/3). Pooled rows (comp_cayley_ln, comp_noedge_ln, comp_similarity) weight their per-type
-means so; Hier rows (comp_hier_bal_e10, comp_hier_xl_e10) use type-balanced aggregation with per-type totals 3 x weight.
-comp_cayley_ln: comp_cayley_nores (components only, no mega-nodes) with the same component LayerNorm - comp_cayley_nores
-fails to train on Pythia (raw component scale), so the LayerNorm is applied on all models alike.
-comp_similarity: comp_cayley_ln with the Cayley edges replaced by FineWeb feature-similarity edges (calib.py, top-k positive
-cosine over all component pairs, no layer / Cayley / hierarchy), read from $SEDGES - the similarity-graph control.
-comp_noedge_ln: comp_cayley_ln with no edges (components pooled directly) - the message-passing ablation.
-comp_resonly_ln: the residual stream r_0..r_{L-1} only (LayerNormed), on a path graph - the no-components ablation.
-Both use gin_cayley's encoder and 256-d readout, so their parameter count equals gin_cayley's (the old comp_noedge /
-comp_resonly were CompGNN, with a 768-d readout / learned embeddings, i.e. more parameters than the baseline).
-Registered in run.build, so run.py / sts.py / ntp.py all take --methods comp_hier_*.
-"""
 import itertools
 import os
 from types import SimpleNamespace
