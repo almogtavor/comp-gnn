@@ -1,0 +1,16 @@
+# Dense models (Pythia, Gemma2, Llama3). setup.sh installs these too.
+torch
+torch-geometric
+transformers>=4.42,<4.50
+sentence-transformers<4
+mteb<2
+peft<0.15
+optuna
+accelerate
+datasets
+h5py
+scikit-learn
+umap-learn
+matplotlib
+wandb
+# Qwen3.6-35B-A3B instead needs: transformers>=5.5 sentence-transformers peft>=0.18 flash-linear-attention
